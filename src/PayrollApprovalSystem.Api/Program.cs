@@ -1,25 +1,86 @@
-var builder = WebApplication.CreateBuilder(args);
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PayrollApprovalSystem.Api.Extensions;
+using PayrollApprovalSystem.Infrastructure.Extensions;
+using PayrollApprovalSystem.Infrastructure.Persistence;
+using Serilog;
 
-// Add services to the container.
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json")
+        .Build())
+    .CreateBootstrapLogger();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    Log.Information("Starting Payroll Approval System API");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((context, services, loggerConfig) =>
+        loggerConfig.ReadFrom.Configuration(context.Configuration));
+
+    // API services
+    builder.Services.AddControllers();
+    builder.Services.AddSwaggerDocumentation();
+    builder.Services.AddApiServices();
+
+    // Infrastructure (PostgreSQL + repositories)
+    builder.Services.AddInfrastructure(
+        builder.Configuration.GetConnectionString("DefaultConnection")!);
+
+    // JWT Authentication
+    var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+    var key = jwtSettings["Key"] ?? throw new InvalidOperationException("JwtSettings:Key is missing.");
+
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+            };
+        });
+
+    builder.Services.AddAuthorization();
+
+    var app = builder.Build();
+
+    // Auto-migrate database
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        dbContext.Database.Migrate();
+    }
+
+    // Configure pipeline
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

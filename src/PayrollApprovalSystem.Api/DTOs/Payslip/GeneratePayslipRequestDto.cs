@@ -1,7 +1,6 @@
 namespace PayrollApprovalSystem.Api.DTOs.Payslip;
 
-public class PayslipResponseDto
+public class GeneratePayslipRequestDto
 {
-    public Guid PayslipId { get; set; }
     public Guid PayrollId { get; set; }
 }
