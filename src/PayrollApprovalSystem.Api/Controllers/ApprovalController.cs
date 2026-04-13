@@ -18,10 +18,11 @@ public class ApprovalController : ControllerBase
         _approvalService = approvalService;
     }
 
-    [HttpPost("approve")]
-    [Authorize(Roles = "Manager,Admin")]
-    public ActionResult<ApprovalResponseDto> ApprovePayroll([FromBody] ApprovePayrollRequestDto request)
-    {
+    [HttpPost("approve")] 
+[Authorize(Roles = "Manager,Admin")]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+public ActionResult<ApprovalResponseDto> ApprovePayroll([FromBody] ApprovePayrollRequestDto request)    {
         // TODO: Replace manual Payroll creation with repository/database lookup.
         var payroll = new Payroll(
             request.PayrollId,

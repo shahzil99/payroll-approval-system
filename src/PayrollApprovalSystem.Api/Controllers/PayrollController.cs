@@ -21,8 +21,9 @@ public class PayrollController : ControllerBase
 
     [HttpPost("generate")]
     [Authorize(Roles = "Admin")]
-    public ActionResult<PayrollResponseDto> GeneratePayroll(GeneratePayrollRequestDto request)
-    {
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<PayrollResponseDto> GeneratePayroll(GeneratePayrollRequestDto request)    {
         try
         {
             // TODO: Replace manual Employee creation with database/repository lookup.
@@ -54,7 +55,11 @@ public class PayrollController : ControllerBase
         }
         catch (DomainException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new
+            {
+                message = ex.Message,
+                type = "DomainError"
+            });
         }
     }
 }

@@ -21,8 +21,10 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public ActionResult<LoginResponseDto> Login(LoginRequestDto request)
-    {
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public ActionResult<LoginResponseDto> Login(LoginRequestDto request)    {
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
         {
             return BadRequest("Username and password are required.");
@@ -53,6 +55,8 @@ public class AuthController : ControllerBase
 
     [HttpGet("secure-test")]
     [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult SecureTest()
     {
         return Ok("JWT fungerer.");

@@ -21,12 +21,15 @@ public class PayslipController : ControllerBase
 
     [HttpPost("generate")]
     [Authorize(Roles = "Employee,Admin,Manager")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<PayslipResponseDto> GeneratePayslip([FromBody] GeneratePayslipRequestDto request)
-    {
-        try
+    {        try
         {
             // TODO: Replace manual Payroll creation with repository/database lookup.
-            // TODO: Persist generated Payslip through Infrastructure layer.            var payroll = new Payroll(
+            // TODO: Persist generated Payslip through Infrastructure layer.
+            
+            var payroll = new Payroll(
                 request.PayrollId,
                 Guid.NewGuid(),
                 4,
@@ -43,7 +46,11 @@ public class PayslipController : ControllerBase
         }
         catch (DomainException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new
+            {
+                message = ex.Message,
+                type = "DomainError"
+            });
         }
     }
 }
