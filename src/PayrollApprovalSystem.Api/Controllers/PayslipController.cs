@@ -26,7 +26,7 @@ public class PayslipController : ControllerBase
         try
         {
             // TODO: Replace manual Payroll creation with repository/database lookup.
-            var payroll = new Payroll(
+            // TODO: Persist generated Payslip through Infrastructure layer.            var payroll = new Payroll(
                 request.PayrollId,
                 Guid.NewGuid(),
                 4,

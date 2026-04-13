@@ -32,7 +32,8 @@ public class ApprovalController : ControllerBase
             5000,
             2000);
 
-        // TODO: Replace manual Approval creation with repository/database lookup or persistence.
+        // TODO: Replace manual Approval creation with repository/database lookup or persistence. 
+		// TODO: Persist approval status changes through Infrastructure layer.
         var approval = new Approval(Guid.NewGuid(), payroll.Id);
 
         _approvalService.ApprovePayroll(payroll, approval);

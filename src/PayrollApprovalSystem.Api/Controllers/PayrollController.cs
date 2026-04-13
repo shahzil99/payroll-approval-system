@@ -25,6 +25,10 @@ public class PayrollController : ControllerBase
     {
         try
         {
+            // TODO: Replace manual Employee creation with database/repository lookup.
+            // TODO: Replace manual PayrollStructure creation with database/repository lookup.
+            // TODO: Persist generated Payroll through Infrastructure layer.
+            
             var employee = new Employee(
                 request.EmployeeId,
                 request.FirstName,
