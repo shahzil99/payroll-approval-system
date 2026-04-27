@@ -18,6 +18,9 @@ public class PayrollStructureRepository : IPayrollStructureRepository
         await _context.PayrollStructures
             .FirstOrDefaultAsync(ps => ps.EmployeeId == employeeId && ps.IsActive);
 
+    public async Task<bool> HasActiveStructureAsync(Guid employeeId) =>
+        await _context.PayrollStructures.AnyAsync(ps => ps.EmployeeId == employeeId && ps.IsActive);
+
     public async Task AddAsync(PayrollStructure payrollStructure)
     {
         await _context.PayrollStructures.AddAsync(payrollStructure);

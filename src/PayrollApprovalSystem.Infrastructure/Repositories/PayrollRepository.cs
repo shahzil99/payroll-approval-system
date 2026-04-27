@@ -23,7 +23,7 @@ public class PayrollRepository : IPayrollRepository
     public async Task<IReadOnlyList<Payroll>> GetByEmployeeIdAsync(Guid employeeId) =>
         await _context.Payrolls.Where(p => p.EmployeeId == employeeId).ToListAsync();
 
-    public async Task<bool> ExistsForMonthAsync(Guid employeeId, int month, int year) =>
+    public async Task<bool> ExistsForEmployeeAndPeriodAsync(Guid employeeId, int month, int year) =>
         await _context.Payrolls.AnyAsync(p => p.EmployeeId == employeeId && p.Month == month && p.Year == year);
 
     public async Task AddAsync(Payroll payroll)
