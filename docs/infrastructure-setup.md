@@ -122,7 +122,7 @@ classDiagram
         +GetByIdAsync(Guid) Task~Payroll?~
         +GetAllAsync() Task~IReadOnlyList~
         +GetByEmployeeIdAsync(Guid) Task~IReadOnlyList~
-        +ExistsForMonthAsync(Guid, int, int) Task~bool~
+        +ExistsForEmployeeAndPeriodAsync(Guid, int, int) Task~bool~
         +AddAsync(Payroll) Task
         +UpdateAsync(Payroll) Task
     }
@@ -138,6 +138,7 @@ classDiagram
     class IPayrollStructureRepository {
         <<interface>>
         +GetActiveByEmployeeIdAsync(Guid) Task~PayrollStructure?~
+        +HasActiveStructureAsync(Guid) Task~bool~
         +AddAsync(PayrollStructure) Task
         +UpdateAsync(PayrollStructure) Task
     }
@@ -169,7 +170,7 @@ classDiagram
         +GetByIdAsync(Guid) Task~Payroll?~
         +GetAllAsync() Task~IReadOnlyList~
         +GetByEmployeeIdAsync(Guid) Task~IReadOnlyList~
-        +ExistsForMonthAsync(Guid, int, int) Task~bool~
+        +ExistsForEmployeeAndPeriodAsync(Guid, int, int) Task~bool~
         +AddAsync(Payroll) Task
         +UpdateAsync(Payroll) Task
     }
@@ -218,9 +219,9 @@ Interfaces live in the **Domain** layer (no infrastructure dependencies). Implem
 | Interface | Implementation | Key Methods |
 |---|---|---|
 | IEmployeeRepository | EmployeeRepository | GetById, GetAll, Add, Update |
-| IPayrollRepository | PayrollRepository | GetById, GetAll, GetByEmployeeId, ExistsForMonth, Add, Update |
+| IPayrollRepository | PayrollRepository | GetById, GetAll, GetByEmployeeId, ExistsForEmployeeAndPeriod, Add, Update |
 | IApprovalRepository | ApprovalRepository | GetById, GetByPayrollId, Add, Update |
-| IPayrollStructureRepository | PayrollStructureRepository | GetActiveByEmployeeId, Add, Update |
+| IPayrollStructureRepository | PayrollStructureRepository | GetActiveByEmployeeId, HasActiveStructure, Add, Update |
 | IPayslipRepository | PayslipRepository | GetById, GetByPayrollId, Add |
 | IDepartmentRepository | DepartmentRepository | GetById, GetAll, Add |
 
