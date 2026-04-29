@@ -24,6 +24,12 @@ public class Payroll
         decimal bonus,
         decimal deductions)
     {
+        if (month < 1 || month > 12)
+            throw new DomainException("Month must be between 1 and 12.");
+
+        if (baseSalary < 0 || bonus < 0 || deductions < 0)
+            throw new DomainException("Amounts cannot be negative.");
+
         Id = id;
         EmployeeId = employeeId;
         Month = month;
