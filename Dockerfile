@@ -6,7 +6,7 @@ COPY src/PayrollApprovalSystem.Domain/PayrollApprovalSystem.Domain.csproj src/Pa
 COPY src/PayrollApprovalSystem.Application/PayrollApprovalSystem.Application.csproj src/PayrollApprovalSystem.Application/
 COPY src/PayrollApprovalSystem.Infrastructure/PayrollApprovalSystem.Infrastructure.csproj src/PayrollApprovalSystem.Infrastructure/
 COPY src/PayrollApprovalSystem.Api/PayrollApprovalSystem.Api.csproj src/PayrollApprovalSystem.Api/
-RUN dotnet restore
+RUN dotnet restore src/PayrollApprovalSystem.Api/PayrollApprovalSystem.Api.csproj
 
 COPY . .
 RUN dotnet publish src/PayrollApprovalSystem.Api/PayrollApprovalSystem.Api.csproj -c Release -o /app/publish
