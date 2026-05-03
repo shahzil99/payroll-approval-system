@@ -51,21 +51,50 @@ Api (Controllers, DTOs, Middleware)
 
 ## Quick Start (Docker)
 
-1. Copy environment template:
-
-```bash
-cp .env.example .env
-```
-
-2. Start services:
-
 ```bash
 docker compose up --build
 ```
 
-3. Open Swagger:
+The API is available at http://localhost:8080 and Swagger at http://localhost:8080/swagger.
 
-- http://localhost:8080/swagger
+On first start the database is auto-migrated and seeded with demo data (Development only):
+
+| Entity | Count | Details |
+|---|---|---|
+| Department | 5 | Human Resources, Engineering, Finance, Marketing, Operations |
+| Employee | 1 | Admin User — admin@payroll.com |
+| PayrollStructure | 1 | Active, 50 000 base / 5 000 bonus / 8 000 deductions |
+
+### Testing the full flow in Swagger
+
+1. **Login** — `POST /api/auth/login`
+   ```json
+   { "username": "admin", "password": "admin123" }
+   ```
+   Copy the `token` from the response.
+
+2. **Authorize** — Click the lock icon in Swagger, enter: `Bearer <token>`
+
+3. **Generate Payroll** — `POST /api/payroll/generate`
+   ```json
+   {
+     "employeeId": "20000000-0000-0000-0000-000000000001",
+     "month": 5,
+     "year": 2026
+   }
+   ```
+
+4. **Approve Payroll** — `POST /api/approval/approve`
+   ```json
+   { "payrollId": "<id from step 3>" }
+   ```
+
+5. **Generate Payslip** — `POST /api/payslip/generate`
+   ```json
+   { "payrollId": "<id from step 3>" }
+   ```
+
+6. **Download PDF** — `GET /api/payslip/{payrollId}/pdf`
 
 ## Environment Variables
 
