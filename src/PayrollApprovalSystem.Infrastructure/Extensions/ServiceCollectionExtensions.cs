@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPayrollStructureRepository, PayrollStructureRepository>();
         services.AddScoped<IPayslipRepository, PayslipRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        services.AddScoped<DatabaseSeeder>();
 
         return services;
     }

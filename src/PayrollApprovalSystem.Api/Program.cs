@@ -58,11 +58,14 @@ try
 
     var app = builder.Build();
 
-    // Auto-migrate database
+    // Auto-migrate and seed database
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         dbContext.Database.Migrate();
+
+        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+        await seeder.SeedAsync();
     }
 
     // Configure pipeline
