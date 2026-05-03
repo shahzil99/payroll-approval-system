@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayrollApprovalSystem.Api.DTOs.Employee;
+using PayrollApprovalSystem.Api.Mappings;
+using PayrollApprovalSystem.Domain.Entities;
 using PayrollApprovalSystem.Domain.Interfaces;
 
 namespace PayrollApprovalSystem.Api.Controllers;
@@ -24,49 +26,47 @@ public class EmployeeController : ControllerBase
     [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetEmployeeById(Guid id)
+    public async Task<ActionResult<EmployeeResponseDto>> GetEmployeeById(Guid id)
     {
         var employee = await _employeeRepository.GetByIdAsync(id);
         if (employee is null)
-            return NotFound(new { message = "Employee not found." });
-
-        return Ok(new EmployeeResponseDto
         {
-            Id = employee.Id,
-            FullName = $"{employee.FirstName} {employee.LastName}",
-            Email = employee.Email,
-            DepartmentId = employee.DepartmentId
-        });
+            return NotFound(new
+            {
+                message = $"Employee with id '{id}' was not found.",
+                type = "NotFound"
+            });
+        }
+
+        return Ok(employee.ToDto());
     }
 
     [HttpGet]
     [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllEmployees()
+    public async Task<ActionResult<IReadOnlyList<EmployeeResponseDto>>> GetAllEmployees()
     {
         var employees = await _employeeRepository.GetAllAsync();
-        var dtos = employees.Select(e => new EmployeeResponseDto
-        {
-            Id = e.Id,
-            FullName = $"{e.FirstName} {e.LastName}",
-            Email = e.Email,
-            DepartmentId = e.DepartmentId
-        }).ToList();
-
-        return Ok(dtos);
+        return Ok(employees.Select(employee => employee.ToDto()).ToList());
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto request)
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EmployeeResponseDto>> CreateEmployee([FromBody] CreateEmployeeRequestDto request)
     {
         var department = await _departmentRepository.GetByIdAsync(request.DepartmentId);
         if (department is null)
-            return BadRequest(new { message = "Department not found." });
+        {
+            return NotFound(new
+            {
+                message = $"Department with id '{request.DepartmentId}' was not found.",
+                type = "NotFound"
+            });
+        }
 
-        var employee = new Domain.Entities.Employee(
+        var employee = new Employee(
             Guid.NewGuid(),
             request.FirstName,
             request.LastName,
@@ -75,46 +75,6 @@ public class EmployeeController : ControllerBase
 
         await _employeeRepository.AddAsync(employee);
 
-        return CreatedAtAction(
-            nameof(GetEmployeeById),
-            new { id = employee.Id },
-            new EmployeeResponseDto
-            {
-                Id = employee.Id,
-                FullName = $"{employee.FirstName} {employee.LastName}",
-                Email = employee.Email,
-                DepartmentId = employee.DepartmentId
-            });
-    }
-
-    [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateEmployee(Guid id, [FromBody] UpdateEmployeeRequestDto request)
-    {
-        var employee = await _employeeRepository.GetByIdAsync(id);
-        if (employee is null)
-            return NotFound(new { message = "Employee not found." });
-
-        var updated = new Domain.Entities.Employee(
-            id,
-            request.FirstName,
-            request.LastName,
-            request.Email,
-            request.DepartmentId);
-
-        if (!request.IsActive)
-            updated.Deactivate();
-
-        await _employeeRepository.UpdateAsync(updated);
-
-        return Ok(new EmployeeResponseDto
-        {
-            Id = updated.Id,
-            FullName = $"{updated.FirstName} {updated.LastName}",
-            Email = updated.Email,
-            DepartmentId = updated.DepartmentId
-        });
+        return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee.ToDto());
     }
 }
